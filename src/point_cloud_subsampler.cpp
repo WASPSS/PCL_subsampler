@@ -1,9 +1,4 @@
-/*
-* pass_through
-* voxel_grid
-* statistical_outlier_removal
-*/
-
+//#include "PCL_includes.h"
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <signal.h>
@@ -27,8 +22,12 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/kdtree/kdtree.h>
+#include <tf/transform_listener.h>
+#include <pcl_ros/transforms.h>
+
 
 ros::Publisher pub;
+tf::TransformListener *tf_listener;
 std::string pass_through_axis = "z";
 double pass_through_min_limit = 0.0;
 double pass_through_max_limit = 2.0;
@@ -49,38 +48,33 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input)
   pcl::PCLPointCloud2 pcl_pc2;
   pcl_conversions::toPCL(*input,pcl_pc2);
 
-  if(pcl_pc2.data.size()!=0){
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  sensor_msgs::PointCloud2 output;
+  pcl::fromPCLPointCloud2(pcl_pc2,*cloud);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    sensor_msgs::PointCloud2 output;
-    pcl::fromPCLPointCloud2(pcl_pc2,*cloud);
+  // 1. Including PassThrough filter here. Removes areas that we are not interested in
+  pcl::PassThrough<pcl::PointXYZ> pass;
+  pass.setInputCloud(cloud);
+  pass.setFilterFieldName(pass_through_axis);
+  pass.setFilterLimits(pass_through_min_limit, pass_through_max_limit);
+  pass.filter(*cloud);
 
-    // 1. Including PassThrough filter here. Removes areas that we are not interested in
-    pcl::PassThrough<pcl::PointXYZ> pass;
-    pass.setInputCloud(cloud);
-    pass.setFilterFieldName(pass_through_axis);
-    pass.setFilterLimits(pass_through_min_limit, pass_through_max_limit);
-    pass.filter(*cloud);
+  // 2. Downsampling with VoxelGrid
+  pcl::VoxelGrid<pcl::PointXYZ> vox;
+  vox.setInputCloud(cloud);
+  vox.setLeafSize(voxel_leaf_size, voxel_leaf_size, voxel_leaf_size);
+  vox.filter(*cloud);
 
+  // 3. Statistical outlier removal
+  pcl::StatisticalOutlierRemoval <pcl::PointXYZ> sor;
+  sor.setInputCloud(cloud);
+  sor.setMeanK (sor_mean_k);
+  sor.setStddevMulThresh(sor_stdev_thresh);
+  sor.filter(*cloud);
 
-    // 2. Downsampling with VoxelGrid
-    pcl::VoxelGrid<pcl::PointXYZ> vox;
-    vox.setInputCloud(cloud);
-    vox.setLeafSize(voxel_leaf_size, voxel_leaf_size, voxel_leaf_size);
-    vox.filter(*cloud);
+  pcl::toROSMsg (*cloud, output);
+  pub.publish (output);
 
-    // 3. Statistical outlier removal
-    pcl::StatisticalOutlierRemoval <pcl::PointXYZ> sor;
-    sor.setInputCloud(cloud);
-    sor.setMeanK (sor_mean_k);
-    sor.setStddevMulThresh(sor_stdev_thresh);
-    sor.filter(*cloud);
-
-    pcl::toROSMsg (*cloud, output);
-
-    // Publish the data.
-    pub.publish (output);
-  }
 }
 
 

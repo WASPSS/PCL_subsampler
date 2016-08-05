@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   pcl_ros
+  tf
 )
 
 catkin_package(
@@ -19,3 +20,6 @@ include_directories(
 
 add_executable(point_cloud_subsampler src/point_cloud_subsampler.cpp)
 target_link_libraries(point_cloud_subsampler ${catkin_LIBRARIES})
+
+add_executable(PCL_transform src/PCL_transform.cpp)
+target_link_libraries(PCL_transform ${catkin_LIBRARIES})
