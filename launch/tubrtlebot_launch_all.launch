@@ -1,0 +1,5 @@
+<launch>
+  <include file="$(find turtlebot_bringup)/launch/minimal.launch" />
+  <include file="$(find turtlebot_bringup)/launch/3dsensor.launch" />
+  <node pkg="turtlebot_point_cloud_subsampler" type="point_cloud_subsampler" name="point_cloud_subsampler"/>
+</launch>
