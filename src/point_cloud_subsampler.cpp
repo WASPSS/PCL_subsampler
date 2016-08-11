@@ -28,13 +28,9 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input){
   pcl::fromPCLPointCloud2(pcl_pc2,*cloud);
 
   pass_through(cloud, pass_through_axis, pass_through_min_limit, pass_through_max_limit);
+  voxel_grid(cloud, voxel_leaf_size);
 
 
-  // 2. Downsampling with VoxelGrid
-  pcl::VoxelGrid<pcl::PointXYZ> vox;
-  vox.setInputCloud(cloud);
-  vox.setLeafSize(voxel_leaf_size, voxel_leaf_size, voxel_leaf_size);
-  vox.filter(*cloud);
 
   // 3. Statistical outlier removal
   pcl::StatisticalOutlierRemoval <pcl::PointXYZ> sor;

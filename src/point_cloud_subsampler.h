@@ -16,7 +16,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 
 
-/* Truncating pointcloud on the interval [min, max] across the specified axis
+/* Truncating cloud on the interval [min, max] across the specified axis
 Arguments:
 cloud       cloud to filter
 axis        axis to filter across
@@ -29,4 +29,13 @@ void pass_through(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis,
   pass.setFilterFieldName(axis);
   pass.setFilterLimits(min, max);
   pass.filter(*cloud);
+}
+
+/* Downsampling cloud with leaf_size. The bigger leaf_size the more sparce cloud. */
+void voxel_grid(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double leaf_size){
+  // 2. Downsampling with VoxelGrid
+  pcl::VoxelGrid<pcl::PointXYZ> vox;
+  vox.setInputCloud(cloud);
+  vox.setLeafSize(leaf_size, leaf_size, leaf_size);
+  vox.filter(*cloud);
 }
