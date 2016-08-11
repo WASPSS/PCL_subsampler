@@ -21,7 +21,10 @@ Arguments:
 cloud       cloud to filter
 axis        axis to filter across
 min         lower limit
-max         upper limit*/
+max         upper limit
+For more information check:
+http://pointclouds.org/documentation/tutorials/passthrough.php
+*/
 void pass_through(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis,
                                                         double min, double max){
   pcl::PassThrough<pcl::PointXYZ> pass;
@@ -31,11 +34,28 @@ void pass_through(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, std::string axis,
   pass.filter(*cloud);
 }
 
-/* Downsampling cloud with leaf_size. The bigger leaf_size the more sparce cloud. */
+/* Downsampling cloud with leaf_size. The bigger leaf_size the more sparce cloud.
+For more information check:
+http://pointclouds.org/documentation/tutorials/voxel_grid.php
+*/
 void voxel_grid(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, double leaf_size){
   // 2. Downsampling with VoxelGrid
   pcl::VoxelGrid<pcl::PointXYZ> vox;
   vox.setInputCloud(cloud);
   vox.setLeafSize(leaf_size, leaf_size, leaf_size);
   vox.filter(*cloud);
+}
+
+/* Removing outliers with SOR filter
+For more information check:
+http://pointclouds.org/documentation/tutorials/statistical_outlier.php
+*/
+void statistical_outlier_removal(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+    double mean_k, double stddev_thresh){
+  // 3. Statistical outlier removal
+  pcl::StatisticalOutlierRemoval <pcl::PointXYZ> sor;
+  sor.setInputCloud(cloud);
+  sor.setMeanK (mean_k);
+  sor.setStddevMulThresh(stddev_thresh);
+  sor.filter(*cloud);
 }

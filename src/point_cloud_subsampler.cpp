@@ -29,15 +29,9 @@ void cloud_cb (const sensor_msgs::PointCloud2ConstPtr& input){
 
   pass_through(cloud, pass_through_axis, pass_through_min_limit, pass_through_max_limit);
   voxel_grid(cloud, voxel_leaf_size);
+  statistical_outlier_removal(cloud, sor_mean_k, sor_stdev_thresh);
 
 
-
-  // 3. Statistical outlier removal
-  pcl::StatisticalOutlierRemoval <pcl::PointXYZ> sor;
-  sor.setInputCloud(cloud);
-  sor.setMeanK (sor_mean_k);
-  sor.setStddevMulThresh(sor_stdev_thresh);
-  sor.filter(*cloud);
 
   pcl::toROSMsg (*cloud, output);
 
