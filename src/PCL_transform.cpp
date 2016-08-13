@@ -36,9 +36,9 @@ void callback(const sensor_msgs::PointCloud2ConstPtr& input)
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_in(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::fromPCLPointCloud2(pcl_pc2,*pcl_in);
 
-  ros::Time now = ros::Time::now();
-  tf_listener->waitForTransform("/map", (*pcl_in).header.frame_id, now, ros::Duration(5.0));
-  pcl_ros::transformPointCloud("/map", *pcl_in, *pcl_out, *tf_listener);
+  ros::Time now = input->header.stamp;
+  tf_listener->waitForTransform("/camera_link", (*pcl_in).header.frame_id, now, ros::Duration(5.0));
+  pcl_ros::transformPointCloud("/camera_link", *pcl_in, *pcl_out, *tf_listener);
 
 
   sensor_msgs::PointCloud2 output;
